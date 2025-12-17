@@ -99,7 +99,6 @@ if (isset($_GET['delete'])) {
             flex-wrap: wrap;
         }
         
-        
         .nav-tab {
             padding: 15px 20px;
             cursor: pointer;
@@ -374,6 +373,7 @@ if (isset($_GET['delete'])) {
             font-size: 12px;
             font-weight: 600;
         }
+        
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -381,6 +381,7 @@ if (isset($_GET['delete'])) {
             font-size: 12px;
             font-weight: bold;
         }
+        
         .code-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -443,7 +444,8 @@ if (isset($_GET['delete'])) {
             <h1>🏢 Полная система кадрового учета</h1>
             <div class="subtitle">Управление всеми данными сотрудников предприятия</div>
         </header>
-                <!-- Сообщения -->
+        
+        <!-- Сообщения -->
         <?php if (isset($_GET['success'])): ?>
         <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; 
                     margin-bottom: 20px; border: 1px solid #c3e6cb;">
@@ -457,18 +459,20 @@ if (isset($_GET['delete'])) {
             <?php echo htmlspecialchars($_GET['error']); ?>
         </div>
         <?php endif; ?>
-        <!-- Добавьте этот код после заголовка на главной странице -->
-<div style="text-align: center; margin-bottom: 25px;">
-    <a href="add_employee.php" class="btn" style="
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        padding: 15px 30px;
-        font-size: 18px;
-        font-weight: bold;
-        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-    ">
-        ➕ Добавить нового сотрудника
-    </a>
-</div>
+        
+        <!-- Кнопка добавления сотрудника -->
+        <div style="text-align: center; margin-bottom: 25px;">
+            <a href="add_employee.php" class="btn" style="
+                background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+                padding: 15px 30px;
+                font-size: 18px;
+                font-weight: bold;
+                box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            ">
+                ➕ Добавить нового сотрудника
+            </a>
+        </div>
+        
         <?php
         try {
             // Получаем статистику по всем таблицам
@@ -534,14 +538,13 @@ if (isset($_GET['delete'])) {
         
         <!-- Навигация -->
         <div class="nav-tabs">
-            <button class="nav-tab active" data-tab="employees">👥 Сотрудники</button>
-            <button class="nav-tab" data-tab="contracts">📝 Договоры</button>
-            <button class="nav-tab" data-tab="departments">🏢 Отделы</button>
-            <button class="nav-tab" data-tab="education">🎓 Образование</button>
-            <button class="nav-tab" data-tab="military">🎖️ Воинский учет</button>
-            <button class="nav-tab" data-tab="awards">🏆 Награды</button>
-            <!-- Добавьте эту строку после вкладки "Награды" -->
-            <button class="nav-tab" data-tab="awards-reference">📖 Справочник наград</button>
+            <button class="nav-tab active" onclick="showTab('employees')">👥 Сотрудники</button>
+            <button class="nav-tab" onclick="showTab('contracts')">📝 Договоры</button>
+            <button class="nav-tab" onclick="showTab('departments')">🏢 Отделы</button>
+            <button class="nav-tab" onclick="showTab('education')">🎓 Образование</button>
+            <button class="nav-tab" onclick="showTab('military')">🎖️ Воинский учет</button>
+            <button class="nav-tab" onclick="showTab('awards')">🏆 Награды</button>
+            <button class="nav-tab" onclick="showTab('awards-reference')">📖 Справочник наград</button>
         </div>
         
         <!-- Вкладка 1: Сотрудники -->
@@ -670,7 +673,7 @@ if (isset($_GET['delete'])) {
         
         <!-- Вкладка 2: Договоры -->
         <div id="contracts" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="margin: 0;">📝 Трудовые договоры</h2>
                 <div>
                     <a href="add_contract.php" class="btn btn-success">
@@ -885,7 +888,7 @@ if (isset($_GET['delete'])) {
                                 <span style="color: #7f8c8d;">—</span>
                                 <?php endif; ?>
                             </td>
-                                                        <td style="white-space: nowrap;">
+                            <td style="white-space: nowrap;">
                                 <a href="edit_department.php?id=<?php echo htmlspecialchars($dept['department_code']); ?>" 
                                    class="btn btn-small btn-warning" style="padding: 4px 8px; margin: 2px;">
                                     ✏️
@@ -1005,16 +1008,16 @@ if (isset($_GET['delete'])) {
                             <td><?php echo htmlspecialchars($edu['graduation_year']); ?></td>
                             <td><?php echo htmlspecialchars($edu['department_name'] ?: '—'); ?></td>
                             <td style="white-space: nowrap;">
-                                    <a href="edit_education.php?id=<?php echo htmlspecialchars($edu['education_document_code']); ?>" 
-                                       class="btn btn-small btn-warning" style="padding: 4px 8px; margin: 2px;">
-                                        ✏️
-                                    </a>
-                                    <a href="?table=education&id=<?php echo htmlspecialchars($edu['education_document_code']); ?>" 
-                                       class="btn btn-small btn-danger" style="padding: 4px 8px; margin: 2px;"
-                                       onclick="return confirm('Удалить запись об образовании?')">
-                                        🗑️
-                                    </a>
-                                </td>
+                                <a href="edit_education.php?id=<?php echo htmlspecialchars($edu['education_document_code']); ?>" 
+                                   class="btn btn-small btn-warning" style="padding: 4px 8px; margin: 2px;">
+                                    ✏️
+                                </a>
+                                <a href="?table=education&id=<?php echo htmlspecialchars($edu['education_document_code']); ?>" 
+                                   class="btn btn-small btn-danger" style="padding: 4px 8px; margin: 2px;"
+                                   onclick="return confirm('Удалить запись об образовании?')">
+                                    🗑️
+                                </a>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                         <?php } catch (Exception $e) { ?>
@@ -1219,127 +1222,25 @@ if (isset($_GET['delete'])) {
                 </table>
             </div>            
         </div>
-        <!-- Вкладка 7: Справочник наград -->            
-            <div id="awards-reference" class="tab-content">
-                <h2>📖 Справочник типов наград</h2>                
-                <?php
-                try {
-                    // Простая проверка - пытаемся получить данные напрямую
-                    $award_types = fetchAll($pdo, "
-                        SELECT 
-                            award_type_code,
-                            award_type_name,
-                            description
-                        FROM award_types 
-                        ORDER BY award_type_code
-                    ");
-                    
-                    if (empty($award_types)) {
-                        echo '<div style="text-align: center; padding: 40px; color: #6c757d;">';
-                        echo '<h3>🏆 Справочник типов наград пуст</h3>';
-                        echo '<p>Таблица существует, но в ней нет данных.</p>';
-                        echo '<p>Заполните таблицу данными:</p>';
-                        echo '<div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: left;">';
-                        echo '<strong>SQL для заполнения:</strong><br>';
-                        echo '<code>INSERT INTO award_types (award_type_code, award_type_name, description) VALUES<br>';
-                        echo "(1, 'Лучший руководитель', 'Награда лучшему руководителю отдела'),<br>";
-                        echo "(2, 'За результаты', 'Награда за достижение высоких результатов'),<br>";
-                        echo "(3, 'Сотрудник месяца', 'Ежемесячная награда лучшему сотруднику');</code>";
-                        echo '</div>';
-                        echo '<a href="awards_reference.php" class="btn btn-success" style="margin-top: 10px;">➕ Управление справочником</a>';
-                        echo '</div>';
-                    } else {
-                        // Получаем статистику использования
-                        $usage_stats = fetchAll($pdo, "
-                            SELECT 
-                                at.award_type_code,
-                                COUNT(a.award_code) as award_count
-                            FROM award_types at
-                            LEFT JOIN award a ON at.award_type_code = a.award_type_code
-                            GROUP BY at.award_type_code
-                        ");
-                        
-                        // Создаем массив для быстрого поиска статистики
-                        $usage_map = [];
-                        foreach ($usage_stats as $stat) {
-                            $usage_map[$stat['award_type_code']] = $stat['award_count'];
-                        }
-                        
-                        echo '<div class="stats-grid" style="margin-bottom: 20px;">';
-                        echo '<div class="stat-card">';
-                        echo '<div class="stat-number">' . count($award_types) . '</div>';
-                        echo '<div class="stat-label">📋 Типов наград</div>';
-                        echo '</div>';
-                        
-                        $total_usage = array_sum($usage_map);
-                        echo '<div class="stat-card">';
-                        echo '<div class="stat-number">' . $total_usage . '</div>';
-                        echo '<div class="stat-label">🏆 Использований</div>';
-                        echo '</div>';
-                        
-                        echo '<div class="stat-card">';
-                        echo '<div class="stat-number">' . max(array_keys($usage_map)) . '</div>';
-                        echo '<div class="stat-label">🔢 Макс. код</div>';
-                        echo '</div>';
-                        echo '</div>';
-                        
-                        echo '<div style="text-align: center; margin-bottom: 20px;">';
-                        echo '<a href="awards_reference.php" class="btn btn-success">🏆 Перейти к управлению</a>';
-                        echo '</div>';
-                        
-                        echo '<div class="table-container">';
-                        echo '<table>';
-                        echo '<thead>';
-                        echo '<tr>';
-                        echo '<th>Код</th>';
-                        echo '<th>Название типа награды</th>';
-                        echo '<th>Описание</th>';
-                        echo '<th>Использовано раз</th>';
-                        echo '</tr>';
-                        echo '</thead>';
-                        echo '<tbody>';
-                        
-                        foreach ($award_types as $type) {
-                            $count = $usage_map[$type['award_type_code']] ?? 0;
-                            $usage_class = $count > 0 ? 'usage-high' : 'usage-low';
-                            
-                            echo '<tr>';
-                            echo '<td>';
-                            echo '<span class="code-badge">';
-                            echo $type['award_type_code'];
-                            echo '</span>';
-                            echo '</td>';
-                            echo '<td><strong>' . htmlspecialchars($type['award_type_name']) . '</strong></td>';
-                            echo '<td>' . htmlspecialchars($type['description'] ?: '—') . '</td>';
-                            echo '<td style="text-align: center;">';
-                            echo '<span class="badge ' . $usage_class . '">';
-                            echo $count;
-                            echo '</span>';
-                            echo '</td>';
-                            echo '</tr>';
-                        }
-                        
-                        echo '</tbody>';
-                        echo '</table>';
-                        echo '</div>';
-                    }
-                } catch (Exception $e) {
-                    echo '<div style="text-align: center; padding: 30px; color: #e74c3c;">';
-                    echo '<h3>❌ Ошибка загрузки справочника наград</h3>';
-                    echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
-                    echo '<p>Возможные причины:</p>';
-                    echo '<ul style="text-align: left; max-width: 600px; margin: 15px auto;">';
-                    echo '<li>1. Таблица award_types не создана</li>';
-                    echo '<li>2. Не установлена схема hr_schema</li>';
-                    echo '<li>3. Проблемы с правами доступа</li>';
-                    echo '</ul>';
-                    echo '<a href="create_awards_table.php" class="btn" style="margin-top: 10px;">🚀 Создать таблицу</a>';
-                    echo '</div>';
-                }
-                
-                ?>              
-                
+        
+        <!-- Вкладка 7: Справочник наград -->
+        <div id="awards-reference" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">📖 Справочник типов наград</h2>
+                <div>
+                    <a href="awards_reference.php" class="btn btn-success">
+                        <span style="margin-right: 5px;">⚙️</span> Управление справочником
+                    </a>
+                    <a href="create_awards_table.php" class="btn btn-info">
+                        <span style="margin-right: 5px;">🛠️</span> Создать таблицу
+                    </a>
+                </div>
             </div>
+            
+            <div id="awards-reference-content" style="padding: 20px; text-align: center;">
+                <p>Загрузка справочника наград...</p>
+            </div>
+        </div>
         
         <footer>
             <p>Полная система кадрового учета &copy; 2024 | База данных: PostgreSQL | Схема: hr_schema</p>
@@ -1357,75 +1258,114 @@ if (isset($_GET['delete'])) {
     </div>
 
     <script>
-        // Данные для фильтрации
-        const departments = <?php echo json_encode($departments_js); ?>;
-        const educationTypes = <?php echo json_encode($education_types_js); ?>;
-        
-        // Инициализация при загрузке страницы
+
+        // === НАЧАЛО ОТЛАДОЧНОГО КОДА (Добавлено для отладки вкладок) ===
+console.log('=== ОТЛАДКА: СКРИПТ ЗАГРУЗИЛСЯ ===');
+
+// 1. Проверка существования функции showTab
+console.log('Проверка: showTab существует?', typeof showTab);
+
+// 2. Проверка элементов при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== ОТЛАДКА: DOM ЗАГРУЖЕН ===');
+    console.log('Найдено кнопок (.nav-tab):', document.querySelectorAll('.nav-tab').length);
+    console.log('Найдено вкладок (.tab-content):', document.querySelectorAll('.tab-content').length);
+    
+    // 3. Проверка клика на первую кнопку
+    const firstButton = document.querySelector('.nav-tab');
+    if (firstButton) {
+        firstButton.addEventListener('click', function() {
+            console.log('✅ ОТЛАДКА: КЛИК ЗАРЕГИСТРИРОВАН! Кнопка:', this.textContent.trim());
+        });
+    } else {
+        console.error('❌ ОТЛАДКА: Не найдено ни одной кнопки .nav-tab!');
+    }
+    
+    // 4. Проверка, назначены ли обработчики onclick на все кнопки
+    const allButtons = document.querySelectorAll('.nav-tab');
+    allButtons.forEach((btn, index) => {
+        console.log(`Кнопка ${index} (${btn.textContent.trim()}): onclick назначен?`, btn.hasAttribute('onclick'));
+    });
+});
+// === КОНЕЦ ОТЛАДОЧНОГО КОДА ===
+
+        // УПРОЩЕННЫЙ И РАБОЧИЙ КОД ДЛЯ ВКЛАДОК
         document.addEventListener('DOMContentLoaded', function() {
-            initTabs();
-            initFilters();
+            console.log('Страница загружена, инициализируем вкладки...');
+            showTab('employees'); // Показываем первую вкладку по умолчанию
             
-            // Загружаем сохраненную вкладку
-            const savedTab = localStorage.getItem('activeTab');
-            if (savedTab) {
-                showTab(savedTab);
-            }
+            // Загружаем данные для справочника наград
+            loadAwardsReference();
         });
         
-        // Управление вкладками
-        function initTabs() {
-            const tabButtons = document.querySelectorAll('.nav-tab');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    showTab(tabId);
-                });
-            });
-        }
-        
+        // ОСНОВНАЯ ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
         function showTab(tabId) {
-            // Скрываем все вкладки
+            console.log('Переключаем на вкладку:', tabId);
+            
+            // 1. Скрываем ВСЕ вкладки
             document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
                 tab.classList.remove('active');
             });
             
-            // Убираем активный класс у всех кнопок
+            // 2. Убираем активный класс у ВСЕХ кнопок
             document.querySelectorAll('.nav-tab').forEach(button => {
                 button.classList.remove('active');
             });
             
-            // Показываем выбранную вкладку
+            // 3. Показываем нужную вкладку
             const tab = document.getElementById(tabId);
             if (tab) {
+                tab.style.display = 'block';
                 tab.classList.add('active');
+                console.log('Вкладка показана:', tabId);
+            } else {
+                console.error('Вкладка не найдена:', tabId);
             }
             
-            // Делаем кнопку активной
-            const activeButton = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
+            // 4. Делаем нужную кнопку активной
+            const buttons = document.querySelectorAll('.nav-tab');
+            buttons.forEach(button => {
+                if (button.onclick && button.onclick.toString().includes(tabId)) {
+                    button.classList.add('active');
+                }
+            });
             
-            // Сохраняем в localStorage
+            // Сохраняем активную вкладку
             localStorage.setItem('activeTab', tabId);
         }
         
-        // Инициализация фильтров
-        function initFilters() {
-            // Добавляем обработчики на Enter для полей ввода
-            document.getElementById('nameFilter')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') filterEmployees();
-            });
+        // Загрузка данных для справочника наград
+        function loadAwardsReference() {
+            const container = document.getElementById('awards-reference-content');
+            if (!container) return;
             
-            document.getElementById('specialtyFilter')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') filterEducation();
-            });
+            container.innerHTML = '<p>🔄 Загрузка данных справочника наград...</p>';
             
-            document.getElementById('awardNameFilter')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') filterAwards();
-            });
+            // Простая загрузка через fetch
+            fetch('get_awards_data.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.text();
+                })
+                .then(data => {
+                    container.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки справочника:', error);
+                    container.innerHTML = `
+                        <div style="color: #e74c3c; padding: 20px;">
+                            <h3>❌ Ошибка загрузки справочника</h3>
+                            <p>${error.message}</p>
+                            <button onclick="loadAwardsReference()" class="btn">🔄 Попробовать снова</button>
+                        </div>
+                    `;
+                });
         }
+        
+        // Данные для фильтрации
+        const departments = <?php echo json_encode($departments_js); ?>;
+        const educationTypes = <?php echo json_encode($education_types_js); ?>;
         
         // Фильтрация сотрудников
         function filterEmployees() {
@@ -1450,7 +1390,6 @@ if (isset($_GET['delete'])) {
                 }
             });
             
-            // Обновляем информацию о количестве
             updateFilterInfo('employees', visibleCount);
         }
         
@@ -1477,7 +1416,6 @@ if (isset($_GET['delete'])) {
                 }
             });
             
-            // Обновляем информацию о количестве
             updateFilterInfo('contracts', visibleCount);
         }
         
@@ -1504,7 +1442,6 @@ if (isset($_GET['delete'])) {
                 }
             });
             
-            // Обновляем информацию о количестве
             updateFilterInfo('education', visibleCount);
         }
         
@@ -1526,7 +1463,6 @@ if (isset($_GET['delete'])) {
                 }
             });
             
-            // Обновляем информацию о количестве
             updateFilterInfo('awards', visibleCount);
         }
         
@@ -1584,20 +1520,6 @@ if (isset($_GET['delete'])) {
                 row.style.display = '';
             });
         }
-        
-        // Обновление страницы
-        function refreshPage() {
-            if (confirm('Обновить данные?')) {
-                location.reload();
-            }
-        }
-        
-        // Автоматическое обновление каждые 10 минут
-        setTimeout(() => {
-            if (confirm('Прошло 10 минут. Обновить данные?')) {
-                location.reload();
-            }
-        }, 600000);
     </script>
 </body>
 </html>
