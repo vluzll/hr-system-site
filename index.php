@@ -1257,212 +1257,61 @@ if (isset($_GET['delete'])) {
         </footer>
     </div>
     <script>
-// ===================================================
-// ПОЛНЫЙ СКРИПТ УПРАВЛЕНИЯ ВКЛАДКАМИ С СОХРАНЕНИЕМ
-// Версия 2.0 - Все функции глобальные
-// ===================================================
-
-console.log('✅ [ИНИЦИАЛИЗАЦИЯ] Скрипт вкладок загружен');
-
-// ==================== ГЛОБАЛЬНЫЕ ФУНКЦИИ ====================
-
-/**
- * Сохраняет активную вкладку в localStorage
- * @param {string} tabId - ID вкладки для сохранения
- */
-function saveActiveTab(tabId) {
-    try {
-        localStorage.setItem('activeTab', tabId);
-        console.log('💾 Сохранена активная вкладка:', tabId);
-    } catch (error) {
-        console.error('❌ Ошибка при сохранении вкладки:', error);
-    }
-}
-
-/**
- * Загружает сохраненную вкладку из localStorage
- * @returns {string} ID вкладки для показа
- */
-function loadActiveTab() {
-    try {
-        const savedTab = localStorage.getItem('activeTab');
-        const defaultTab = 'employees';
-        
-        console.log('📂 Прочитано из хранилища:', savedTab);
-        
-        if (!savedTab) {
-            console.log('📂 Хранилище пусто, показываем:', defaultTab);
-            return defaultTab;
-        }
-        
-        // Проверяем, существует ли элемент с таким ID
-        if (document.getElementById(savedTab)) {
-            console.log('✅ Нашли сохраненную вкладку:', savedTab);
-            return savedTab;
-        } else {
-            console.warn('⚠️ Вкладка "' + savedTab + '" не найдена на странице');
-            return defaultTab;
-        }
-    } catch (error) {
-        console.error('❌ Ошибка при чтении из хранилища:', error);
-        return 'employees';
-    }
-}
-
-/**
- * Основная функция переключения вкладок
- * @param {string} tabId - ID вкладки для показа
- */
-function showTab(tabId) {
-    console.log('🔄 Переключаем на вкладку:', tabId);
-    
-    // 1. Сохраняем выбор пользователя
-    saveActiveTab(tabId);
-    
-    // 2. Находим все элементы
-    const allTabs = document.querySelectorAll('.tab-content');
-    const allButtons = document.querySelectorAll('.nav-tab');
-    const targetTab = document.getElementById(tabId);
-    
-    // 3. Проверяем существование целевой вкладки
-    if (!targetTab) {
-        console.error('❌ Вкладка с ID "' + tabId + '" не найдена!');
-        return;
-    }
-    
-    // 4. Скрываем ВСЕ вкладки и снимаем активность с кнопок
-    allTabs.forEach(tab => {
-        tab.style.display = 'none';
-        tab.classList.remove('active');
-    });
-    
-    allButtons.forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // 5. Показываем нужную вкладку
-    targetTab.style.display = 'block';
-    targetTab.classList.add('active');
-    console.log('✅ Вкладка показана:', tabId);
-    
-    // 6. Находим и активируем соответствующую кнопку
-    // Способ 1: Ищем кнопку по data-tab атрибуту
-    let activeButton = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
-    
-    // Способ 2: Если не нашли, ищем по onclick атрибуту
-    if (!activeButton) {
-        activeButton = document.querySelector(`.nav-tab[onclick*="${tabId}"]`);
-    }
-    
-    // Способ 3: Если не нашли, перебираем все кнопки и сравниваем текст
-    if (!activeButton) {
-        allButtons.forEach(btn => {
-            if (btn.textContent.includes(getTabName(tabId))) {
-                activeButton = btn;
-            }
-        });
-    }
-    
-    if (activeButton) {
-        activeButton.classList.add('active');
-        console.log('✅ Активирована кнопка:', activeButton.textContent.trim());
-    } else {
-        console.warn('⚠️ Не найдена кнопка для вкладки:', tabId);
-    }
-}
-
-/**
- * Вспомогательная функция для поиска кнопки по названию вкладки
- * @param {string} tabId - ID вкладки
- * @returns {string} Название вкладки на русском
- */
-function getTabName(tabId) {
-    const names = {
-        'employees': 'Сотрудники',
-        'contracts': 'Договоры',
-        'departments': 'Отделы',
-        'education': 'Образование',
-        'military': 'Воинский учет',
-        'awards': 'Награды',
-        'awards-reference': 'Справочник наград'
-    };
-    return names[tabId] || '';
-}
-
-/**
- * Назначает обработчики всем кнопкам вкладок
- */
-function setupTabButtons() {
-    const allButtons = document.querySelectorAll('.nav-tab');
-    console.log('🔗 Найдено кнопок:', allButtons.length);
-    
-    allButtons.forEach((button, index) => {
-        // Если у кнопки еще нет обработчика onclick
-        if (!button.getAttribute('onclick')) {
-            // Определяем ID вкладки
-            let tabId = button.getAttribute('data-tab');
-            
-            // Если нет data-tab, определяем по тексту кнопки
-            if (!tabId) {
-                const text = button.textContent;
-                if (text.includes('Договоры')) tabId = 'contracts';
-                else if (text.includes('Отделы')) tabId = 'departments';
-                else if (text.includes('Образование')) tabId = 'education';
-                else if (text.includes('Воинский')) tabId = 'military';
-                else if (text.includes('Награды')) tabId = 'awards';
-                else if (text.includes('Справочник')) tabId = 'awards-reference';
-                else tabId = 'employees';
-                
-                // Устанавливаем data-tab для будущего использования
-                button.setAttribute('data-tab', tabId);
-            }
-            
-            // Назначаем обработчик
-            button.setAttribute('onclick', `showTab('${tabId}')`);
-            console.log(`🔗 Кнопка ${index}: назначен onclick для "${tabId}"`);
-        }
-    });
-}
-
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
-
-/**
- * Основная функция инициализации
- */
-function initTabs() {
-    console.log('🚀 Инициализация системы вкладок...');
-    
-    // 1. Настраиваем все кнопки
-    setupTabButtons();
-    
-    // 2. Загружаем сохраненную вкладку
-    const tabToShow = loadActiveTab();
-    
-    // 3. Показываем вкладку
-    showTab(tabToShow);
-    
-    // 4. Для отладки: вешаем обработчик на первую кнопку
-    const firstButton = document.querySelector('.nav-tab');
-    if (firstButton) {
-        firstButton.addEventListener('click', function() {
-            console.log('👆 Прямой клик зарегистрирован на:', this.textContent.trim());
-        });
-    }
-    
-    console.log('✅ Система вкладок готова к работе');
-}
-
-// ==================== ЗАПУСК ====================
-
-// Запускаем инициализацию после загрузки DOM
+// ПРОСТОЙ СКРИПТ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 DOM загружен, запускаем инициализацию...');
-    initTabs();
-});
-
-// Также запускаем инициализацию при полной загрузке страницы
-window.addEventListener('load', function() {
-    console.log('🌐 Страница полностью загружена');
+    console.log('Страница загружена');
+    
+    // Находим все кнопки и вкладки
+    const tabButtons = document.querySelectorAll('.nav-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    console.log('Найдено кнопок:', tabButtons.length);
+    console.log('Найдено вкладок:', tabContents.length);
+    
+    // Функция для переключения вкладок
+    function switchTab(tabId) {
+        console.log('Показываем вкладку:', tabId);
+        
+        // Скрываем все вкладки
+        tabContents.forEach(tab => {
+            tab.style.display = 'none';
+            tab.classList.remove('active');
+        });
+        
+        // Убираем активность у всех кнопок
+        tabButtons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Показываем нужную вкладку
+        const targetTab = document.getElementById(tabId);
+        if (targetTab) {
+            targetTab.style.display = 'block';
+            targetTab.classList.add('active');
+        }
+        
+        // Активируем нужную кнопку
+        const activeButton = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
+    
+    // Вешаем обработчики на все кнопки
+    tabButtons.forEach(button => {
+        const tabId = button.getAttribute('data-tab');
+        if (tabId) {
+            button.addEventListener('click', function() {
+                switchTab(tabId);
+            });
+        }
+    });
+    
+    // Показываем первую вкладку
+    if (tabButtons.length > 0 && tabContents.length > 0) {
+        const firstTabId = tabButtons[0].getAttribute('data-tab') || 'employees';
+        switchTab(firstTabId);
+    }
 });
 </script>
 </body>
@@ -1472,5 +1321,6 @@ window.addEventListener('load', function() {
 // Закрываем соединение с БД
 closeDB($pdo);
 ?>
+
 
 
