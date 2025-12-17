@@ -1256,64 +1256,242 @@ if (isset($_GET['delete'])) {
             <p>Последнее обновление: <?php echo date('d.m.Y H:i:s'); ?></p>
         </footer>
     </div>
+
     <script>
-// ПРОСТОЙ СКРИПТ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Страница загружена');
-    
-    // Находим все кнопки и вкладки
-    const tabButtons = document.querySelectorAll('.nav-tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    console.log('Найдено кнопок:', tabButtons.length);
-    console.log('Найдено вкладок:', tabContents.length);
-    
-    // Функция для переключения вкладок
-    function switchTab(tabId) {
-        console.log('Показываем вкладку:', tabId);
+
         
-        // Скрываем все вкладки
-        tabContents.forEach(tab => {
-            tab.style.display = 'none';
-            tab.classList.remove('active');
+        // УПРОЩЕННЫЙ И РАБОЧИЙ КОД ДЛЯ ВКЛАДОК
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница загружена, инициализируем вкладки...');
+            showTab('employees'); // Показываем первую вкладку по умолчанию
+            
+            // Загружаем данные для справочника наград
+            loadAwardsReference();
         });
         
-        // Убираем активность у всех кнопок
-        tabButtons.forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        // Показываем нужную вкладку
-        const targetTab = document.getElementById(tabId);
-        if (targetTab) {
-            targetTab.style.display = 'block';
-            targetTab.classList.add('active');
+        // ОСНОВНАЯ ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
+        function showTab(tabId) {
+            console.log('Переключаем на вкладку:', tabId);
+            
+            // 1. Скрываем ВСЕ вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+                tab.classList.remove('active');
+            });
+            
+            // 2. Убираем активный класс у ВСЕХ кнопок
+            document.querySelectorAll('.nav-tab').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // 3. Показываем нужную вкладку
+            const tab = document.getElementById(tabId);
+            if (tab) {
+                tab.style.display = 'block';
+                tab.classList.add('active');
+                console.log('Вкладка показана:', tabId);
+            } else {
+                console.error('Вкладка не найдена:', tabId);
+            }
+            
+            // 4. Делаем нужную кнопку активной
+            const buttons = document.querySelectorAll('.nav-tab');
+            buttons.forEach(button => {
+                if (button.onclick && button.onclick.toString().includes(tabId)) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // Сохраняем активную вкладку
+            localStorage.setItem('activeTab', tabId);
         }
         
-        // Активируем нужную кнопку
-        const activeButton = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
-        if (activeButton) {
-            activeButton.classList.add('active');
+        // Загрузка данных для справочника наград
+        function loadAwardsReference() {
+            const container = document.getElementById('awards-reference-content');
+            if (!container) return;
+            
+            container.innerHTML = '<p>🔄 Загрузка данных справочника наград...</p>';
+            
+            // Простая загрузка через fetch
+            fetch('get_awards_data.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.text();
+                })
+                .then(data => {
+                    container.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки справочника:', error);
+                    container.innerHTML = `
+                        <div style="color: #e74c3c; padding: 20px;">
+                            <h3>❌ Ошибка загрузки справочника</h3>
+                            <p>${error.message}</p>
+                            <button onclick="loadAwardsReference()" class="btn">🔄 Попробовать снова</button>
+                        </div>
+                    `;
+                });
         }
-    }
-    
-    // Вешаем обработчики на все кнопки
-    tabButtons.forEach(button => {
-        const tabId = button.getAttribute('data-tab');
-        if (tabId) {
-            button.addEventListener('click', function() {
-                switchTab(tabId);
+        
+        // Данные для фильтрации
+        const departments = <?php echo json_encode($departments_js); ?>;
+        const educationTypes = <?php echo json_encode($education_types_js); ?>;
+        
+        // Фильтрация сотрудников
+        function filterEmployees() {
+            const deptFilter = document.getElementById('deptFilter')?.value || '';
+            const nameFilter = document.getElementById('nameFilter')?.value.toLowerCase() || '';
+            const rows = document.querySelectorAll('#employeesTable tbody tr');
+            
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const deptCode = row.getAttribute('data-dept') || '';
+                const nameCell = row.cells[1].textContent.toLowerCase();
+                
+                const deptMatch = !deptFilter || deptCode == deptFilter;
+                const nameMatch = !nameFilter || nameCell.includes(nameFilter);
+                
+                if (deptMatch && nameMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            updateFilterInfo('employees', visibleCount);
+        }
+        
+        // Фильтрация договоров
+        function filterContracts() {
+            const statusFilter = document.getElementById('statusFilter')?.value || '';
+            const deptFilter = document.getElementById('contractDeptFilter')?.value || '';
+            const rows = document.querySelectorAll('#contractsTable tbody tr');
+            
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status') || '';
+                const deptCode = row.getAttribute('data-dept') || '';
+                
+                const statusMatch = !statusFilter || status === statusFilter;
+                const deptMatch = !deptFilter || deptCode == deptFilter;
+                
+                if (statusMatch && deptMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            updateFilterInfo('contracts', visibleCount);
+        }
+        
+        // Фильтрация образования
+        function filterEducation() {
+            const typeFilter = document.getElementById('educationTypeFilter')?.value || '';
+            const specialtyFilter = document.getElementById('specialtyFilter')?.value.toLowerCase() || '';
+            const rows = document.querySelectorAll('#educationTable tbody tr');
+            
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const typeCode = row.getAttribute('data-type') || '';
+                const specialtyCell = row.cells[4].textContent.toLowerCase();
+                
+                const typeMatch = !typeFilter || typeCode == typeFilter;
+                const specialtyMatch = !specialtyFilter || specialtyCell.includes(specialtyFilter);
+                
+                if (typeMatch && specialtyMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            updateFilterInfo('education', visibleCount);
+        }
+        
+        // Фильтрация наград
+        function filterAwards() {
+            const nameFilter = document.getElementById('awardNameFilter')?.value.toLowerCase() || '';
+            const rows = document.querySelectorAll('#awardsTable tbody tr');
+            
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const awardNameCell = row.cells[2].textContent.toLowerCase();
+                
+                if (!nameFilter || awardNameCell.includes(nameFilter)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            updateFilterInfo('awards', visibleCount);
+        }
+        
+        // Обновление информации о количестве найденных записей
+        function updateFilterInfo(tab, count) {
+            const infoElement = document.getElementById(tab + 'Info');
+            if (infoElement) {
+                const totalRows = document.querySelectorAll(`#${tab}Table tbody tr`).length;
+                if (count === totalRows) {
+                    infoElement.textContent = `Всего записей: ${count}`;
+                    infoElement.style.color = '#666';
+                } else {
+                    infoElement.textContent = `Найдено: ${count} из ${totalRows} записей`;
+                    infoElement.style.color = '#3498db';
+                    infoElement.style.fontWeight = 'bold';
+                }
+            }
+        }
+        
+        // Сброс фильтров для конкретной вкладки
+        function resetFilter(tab) {
+            switch(tab) {
+                case 'employees':
+                    document.getElementById('deptFilter').value = '';
+                    document.getElementById('nameFilter').value = '';
+                    showAllRows('#employeesTable tbody tr');
+                    updateFilterInfo('employees', document.querySelectorAll('#employeesTable tbody tr').length);
+                    break;
+                    
+                case 'contracts':
+                    document.getElementById('statusFilter').value = '';
+                    document.getElementById('contractDeptFilter').value = '';
+                    showAllRows('#contractsTable tbody tr');
+                    updateFilterInfo('contracts', document.querySelectorAll('#contractsTable tbody tr').length);
+                    break;
+                    
+                case 'education':
+                    document.getElementById('educationTypeFilter').value = '';
+                    document.getElementById('specialtyFilter').value = '';
+                    showAllRows('#educationTable tbody tr');
+                    updateFilterInfo('education', document.querySelectorAll('#educationTable tbody tr').length);
+                    break;
+                    
+                case 'awards':
+                    document.getElementById('awardNameFilter').value = '';
+                    showAllRows('#awardsTable tbody tr');
+                    updateFilterInfo('awards', document.querySelectorAll('#awardsTable tbody tr').length);
+                    break;
+            }
+        }
+        
+        // Показать все строки в таблице
+        function showAllRows(selector) {
+            document.querySelectorAll(selector).forEach(row => {
+                row.style.display = '';
             });
         }
-    });
-    
-    // Показываем первую вкладку
-    if (tabButtons.length > 0 && tabContents.length > 0) {
-        const firstTabId = tabButtons[0].getAttribute('data-tab') || 'employees';
-        switchTab(firstTabId);
-    }
-});
-</script>
+    </script>
 </body>
 </html>
 
@@ -1321,6 +1499,3 @@ document.addEventListener('DOMContentLoaded', function() {
 // Закрываем соединение с БД
 closeDB($pdo);
 ?>
-
-
-
