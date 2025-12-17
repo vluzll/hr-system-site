@@ -1256,40 +1256,67 @@ if (isset($_GET['delete'])) {
             <p>Последнее обновление: <?php echo date('d.m.Y H:i:s'); ?></p>
         </footer>
     </div>
+    <script>
+// ===================================================
+// ПОЛНЫЙ СКРИПТ УПРАВЛЕНИЯ ВКЛАДКАМИ С СОХРАНЕНИЕМ
+// Версия 2.0 - Все функции глобальные
+// ===================================================
 
-    // ============================================
-// ГЛАВНЫЙ СКРИПТ ДЛЯ УПРАВЛЕНИЯ ВКЛАДКАМИ
-// ВЕРСИЯ С СОХРАНЕНИЕМ СОСТОЯНИЯ И ОТЛАДКОЙ
-// ============================================
+console.log('✅ [ИНИЦИАЛИЗАЦИЯ] Скрипт вкладок загружен');
 
-// ---------- ОТЛАДОЧНЫЙ КОД (можно потом удалить) ----------
-console.log('🔧 [ОТЛАДКА] Скрипт вкладок загружен.');
-console.log('🔧 [ОТЛАДКА] Функция showTab существует?', typeof showTab);
-// ---------------------------------------------------------
+// ==================== ГЛОБАЛЬНЫЕ ФУНКЦИИ ====================
 
-// ---------- ФУНКЦИИ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ ----------
+/**
+ * Сохраняет активную вкладку в localStorage
+ * @param {string} tabId - ID вкладки для сохранения
+ */
 function saveActiveTab(tabId) {
-    localStorage.setItem('activeTab', tabId);
-    console.log('💾 [ОТЛАДКА] Сохранили активную вкладку:', tabId);
-}
-
-function loadActiveTab() {
-    const savedTab = localStorage.getItem('activeTab');
-    const defaultTab = 'employees';
-    
-    if (savedTab && document.getElementById(savedTab)) {
-        console.log('📂 [ОТЛАДКА] Загружаем сохраненную вкладку:', savedTab);
-        return savedTab;
+    try {
+        localStorage.setItem('activeTab', tabId);
+        console.log('💾 Сохранена активная вкладка:', tabId);
+    } catch (error) {
+        console.error('❌ Ошибка при сохранении вкладки:', error);
     }
-    console.log('📂 [ОТЛАДКА] Сохраненной вкладки нет, показываем:', defaultTab);
-    return defaultTab;
 }
 
-// ---------- ОСНОВНАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ----------
+/**
+ * Загружает сохраненную вкладку из localStorage
+ * @returns {string} ID вкладки для показа
+ */
+function loadActiveTab() {
+    try {
+        const savedTab = localStorage.getItem('activeTab');
+        const defaultTab = 'employees';
+        
+        console.log('📂 Прочитано из хранилища:', savedTab);
+        
+        if (!savedTab) {
+            console.log('📂 Хранилище пусто, показываем:', defaultTab);
+            return defaultTab;
+        }
+        
+        // Проверяем, существует ли элемент с таким ID
+        if (document.getElementById(savedTab)) {
+            console.log('✅ Нашли сохраненную вкладку:', savedTab);
+            return savedTab;
+        } else {
+            console.warn('⚠️ Вкладка "' + savedTab + '" не найдена на странице');
+            return defaultTab;
+        }
+    } catch (error) {
+        console.error('❌ Ошибка при чтении из хранилища:', error);
+        return 'employees';
+    }
+}
+
+/**
+ * Основная функция переключения вкладок
+ * @param {string} tabId - ID вкладки для показа
+ */
 function showTab(tabId) {
-    console.log('🔄 [ОТЛАДКА] Пытаемся показать вкладку:', tabId);
+    console.log('🔄 Переключаем на вкладку:', tabId);
     
-    // 1. СОХРАНЯЕМ ВЫБОР
+    // 1. Сохраняем выбор пользователя
     saveActiveTab(tabId);
     
     // 2. Находим все элементы
@@ -1297,15 +1324,13 @@ function showTab(tabId) {
     const allButtons = document.querySelectorAll('.nav-tab');
     const targetTab = document.getElementById(tabId);
     
-    // 3. Проверяем, существует ли целевая вкладка
+    // 3. Проверяем существование целевой вкладки
     if (!targetTab) {
-        console.error('❌ [ОШИБКА] Вкладка с ID "' + tabId + '" не найдена!');
-        return; // Прерываем выполнение, если вкладки нет
+        console.error('❌ Вкладка с ID "' + tabId + '" не найдена!');
+        return;
     }
     
-    console.log('✅ [ОТЛАДКА] Целевая вкладка найдена, скрываем остальные...');
-    
-    // 4. Скрываем ВСЕ вкладки и деактивируем кнопки (силовым методом)
+    // 4. Скрываем ВСЕ вкладки и снимаем активность с кнопок
     allTabs.forEach(tab => {
         tab.style.display = 'none';
         tab.classList.remove('active');
@@ -1315,59 +1340,131 @@ function showTab(tabId) {
         btn.classList.remove('active');
     });
     
-    // 5. ПОКАЗЫВАЕМ нужную вкладку и активируем кнопку
+    // 5. Показываем нужную вкладку
     targetTab.style.display = 'block';
     targetTab.classList.add('active');
+    console.log('✅ Вкладка показана:', tabId);
     
-    // Ищем и активируем соответствующую кнопку
-    const activeButton = document.querySelector(`.nav-tab[onclick*="${tabId}"]`);
-    if (activeButton) {
-        activeButton.classList.add('active');
-        console.log('✅ [ОТЛАДКА] Активировали кнопку для вкладки:', tabId);
-    } else {
-        console.warn('⚠️ [ОТЛАДКА] Не найдена кнопка для вкладки:', tabId);
+    // 6. Находим и активируем соответствующую кнопку
+    // Способ 1: Ищем кнопку по data-tab атрибуту
+    let activeButton = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+    
+    // Способ 2: Если не нашли, ищем по onclick атрибуту
+    if (!activeButton) {
+        activeButton = document.querySelector(`.nav-tab[onclick*="${tabId}"]`);
     }
     
-    console.log('✅ [ОТЛАДКА] Вкладка успешно показана:', tabId);
+    // Способ 3: Если не нашли, перебираем все кнопки и сравниваем текст
+    if (!activeButton) {
+        allButtons.forEach(btn => {
+            if (btn.textContent.includes(getTabName(tabId))) {
+                activeButton = btn;
+            }
+        });
+    }
+    
+    if (activeButton) {
+        activeButton.classList.add('active');
+        console.log('✅ Активирована кнопка:', activeButton.textContent.trim());
+    } else {
+        console.warn('⚠️ Не найдена кнопка для вкладки:', tabId);
+    }
 }
 
-// ---------- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ----------
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 [ОТЛАДКА] Страница загружена, инициализируем вкладки...');
-    console.log('🔧 [ОТЛАДКА] Кнопок найдено:', document.querySelectorAll('.nav-tab').length);
-    console.log('🔧 [ОТЛАДКА] Вкладок найдено:', document.querySelectorAll('.tab-content').length);
-    
-    // 1. Показываем вкладку (сохраненную или первую)
-    const tabToShow = loadActiveTab();
-    showTab(tabToShow);
-    
-    // 2. Убедимся, что все кнопки имеют правильный обработчик
+/**
+ * Вспомогательная функция для поиска кнопки по названию вкладки
+ * @param {string} tabId - ID вкладки
+ * @returns {string} Название вкладки на русском
+ */
+function getTabName(tabId) {
+    const names = {
+        'employees': 'Сотрудники',
+        'contracts': 'Договоры',
+        'departments': 'Отделы',
+        'education': 'Образование',
+        'military': 'Воинский учет',
+        'awards': 'Награды',
+        'awards-reference': 'Справочник наград'
+    };
+    return names[tabId] || '';
+}
+
+/**
+ * Назначает обработчики всем кнопкам вкладок
+ */
+function setupTabButtons() {
     const allButtons = document.querySelectorAll('.nav-tab');
-    allButtons.forEach(button => {
-        // Проверяем, есть ли уже onclick
-        if (!button.onclick) {
-            // Если нет — назначаем, извлекая ID из атрибута data-tab или текста
-            const tabId = button.getAttribute('data-tab') || 
-                         (button.textContent.includes('Договоры') ? 'contracts' :
-                          button.textContent.includes('Отделы') ? 'departments' :
-                          button.textContent.includes('Образование') ? 'education' :
-                          button.textContent.includes('Воинский') ? 'military' :
-                          button.textContent.includes('Награды') ? 'awards' :
-                          button.textContent.includes('Справочник') ? 'awards-reference' : 'employees');
+    console.log('🔗 Найдено кнопок:', allButtons.length);
+    
+    allButtons.forEach((button, index) => {
+        // Если у кнопки еще нет обработчика onclick
+        if (!button.getAttribute('onclick')) {
+            // Определяем ID вкладки
+            let tabId = button.getAttribute('data-tab');
             
+            // Если нет data-tab, определяем по тексту кнопки
+            if (!tabId) {
+                const text = button.textContent;
+                if (text.includes('Договоры')) tabId = 'contracts';
+                else if (text.includes('Отделы')) tabId = 'departments';
+                else if (text.includes('Образование')) tabId = 'education';
+                else if (text.includes('Воинский')) tabId = 'military';
+                else if (text.includes('Награды')) tabId = 'awards';
+                else if (text.includes('Справочник')) tabId = 'awards-reference';
+                else tabId = 'employees';
+                
+                // Устанавливаем data-tab для будущего использования
+                button.setAttribute('data-tab', tabId);
+            }
+            
+            // Назначаем обработчик
             button.setAttribute('onclick', `showTab('${tabId}')`);
-            console.log('🔗 [ОТЛАДКА] Назначили обработчик кнопке:', button.textContent.trim());
+            console.log(`🔗 Кнопка ${index}: назначен onclick для "${tabId}"`);
         }
     });
+}
+
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+
+/**
+ * Основная функция инициализации
+ */
+function initTabs() {
+    console.log('🚀 Инициализация системы вкладок...');
     
-    console.log('✅ [ОТЛАДКА] Инициализация завершена.');
+    // 1. Настраиваем все кнопки
+    setupTabButtons();
+    
+    // 2. Загружаем сохраненную вкладку
+    const tabToShow = loadActiveTab();
+    
+    // 3. Показываем вкладку
+    showTab(tabToShow);
+    
+    // 4. Для отладки: вешаем обработчик на первую кнопку
+    const firstButton = document.querySelector('.nav-tab');
+    if (firstButton) {
+        firstButton.addEventListener('click', function() {
+            console.log('👆 Прямой клик зарегистрирован на:', this.textContent.trim());
+        });
+    }
+    
+    console.log('✅ Система вкладок готова к работе');
+}
+
+// ==================== ЗАПУСК ====================
+
+// Запускаем инициализацию после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM загружен, запускаем инициализацию...');
+    initTabs();
 });
 
-// ---------- ДОПОЛНИТЕЛЬНО: Быстрая проверка клика ----------
-// Вешаем простой обработчик на первую кнопку для проверки
-document.querySelector('.nav-tab')?.addEventListener('click', function() {
-    console.log('👆 [ОТЛАДКА] Прямой клик зарегистрирован на:', this.textContent.trim());
+// Также запускаем инициализацию при полной загрузке страницы
+window.addEventListener('load', function() {
+    console.log('🌐 Страница полностью загружена');
 });
+</script>
 </body>
 </html>
 
@@ -1375,4 +1472,5 @@ document.querySelector('.nav-tab')?.addEventListener('click', function() {
 // Закрываем соединение с БД
 closeDB($pdo);
 ?>
+
 
